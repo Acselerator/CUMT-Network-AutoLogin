@@ -11,7 +11,6 @@ if %errorLevel% neq 0 (
     del "%temp%\getadmin.vbs"
     exit /b
 )
-:: 提权后当前目录会变成 System32，必须切回脚本真实所在目录
 cd /d "%~dp0"
 :: =========================================================
 
@@ -63,18 +62,18 @@ echo.
 echo 你的最终登录账号已生成为: 【%stuid%】
 echo.
 
-:: 4. 设定安装目录为当前目录 (%~dp0 自带尾部反斜杠)
+:: 4. 设定安装目录为当前目录
 set "INSTALL_DIR=%~dp0"
 set "SCRIPT_PATH=%INSTALL_DIR%login.bat"
 set "XML_PATH=%INSTALL_DIR%task.xml"
 
-:: 5. 动态生成核心登录脚本 (login.bat)
+:: 5. 动态生成核心登录脚本 (增加 curl 断网重试机制)
 echo [1/3] 正在生成自动登录脚本...
 > "%SCRIPT_PATH%" echo @echo off
->>"%SCRIPT_PATH%" echo curl -X POST "http://10.2.5.251:801/eportal/?c=ACSetting&a=Login" -d "DDDDD=%stuid%" -d "upass=%pwd%" -d "R1=0" -d "R2=0" -d "R3=0" -d "R6=0" -d "para=00" -d "0MKKey=123456"
+>>"%SCRIPT_PATH%" echo curl --retry 2 --retry-delay 3 -X POST "http://10.2.5.251:801/eportal/?c=ACSetting&a=Login" -d "DDDDD=%stuid%" -d "upass=%pwd%" -d "R1=0" -d "R2=0" -d "R3=0" -d "R6=0" -d "para=00" -d "0MKKey=123456"
 >>"%SCRIPT_PATH%" echo exit
 
-:: 6. 动态生成任务计划的 XML 配置文件 (引入 SYSTEM 账户与双网络支持)
+:: 6. 动态生成任务计划的 XML 配置文件 (开机唤醒延迟延长至5秒)
 echo [2/3] 正在生成系统任务配置...
 > "%XML_PATH%" echo ^<?xml version="1.0" encoding="UTF-16"?^>
 >>"%XML_PATH%" echo ^<Task version="1.2" xmlns="http://schemas.microsoft.com/windows/2004/02/mit/task"^>
@@ -85,12 +84,12 @@ echo [2/3] 正在生成系统任务配置...
 >>"%XML_PATH%" echo     ^</EventTrigger^>
 >>"%XML_PATH%" echo     ^<LogonTrigger^>
 >>"%XML_PATH%" echo       ^<Enabled^>true^</Enabled^>
->>"%XML_PATH%" echo       ^<Delay^>PT3S^</Delay^>
+>>"%XML_PATH%" echo       ^<Delay^>PT5S^</Delay^>
 >>"%XML_PATH%" echo     ^</LogonTrigger^>
 >>"%XML_PATH%" echo     ^<SessionStateChangeTrigger^>
 >>"%XML_PATH%" echo       ^<Enabled^>true^</Enabled^>
 >>"%XML_PATH%" echo       ^<StateChange^>SessionUnlock^</StateChange^>
->>"%XML_PATH%" echo       ^<Delay^>PT3S^</Delay^>
+>>"%XML_PATH%" echo       ^<Delay^>PT5S^</Delay^>
 >>"%XML_PATH%" echo     ^</SessionStateChangeTrigger^>
 >>"%XML_PATH%" echo   ^</Triggers^>
 >>"%XML_PATH%" echo   ^<Principals^>
