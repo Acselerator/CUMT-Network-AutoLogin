@@ -81,6 +81,7 @@ echo [2/3] 正在生成系统任务配置...
 >>"%XML_PATH%" echo     ^<EventTrigger^>
 >>"%XML_PATH%" echo       ^<Enabled^>true^</Enabled^>
 >>"%XML_PATH%" echo       ^<Subscription^>^&lt;QueryList^&gt;^&lt;Query Id="0" Path="Microsoft-Windows-NetworkProfile/Operational"^&gt;^&lt;Select Path="Microsoft-Windows-NetworkProfile/Operational"^&gt;*[System[(EventID=10000)]] and *[EventData[(Data[@Name='Name']='CUMT_Stu' or Data[@Name='Name']='CUMT_Tec')]]^&lt;/Select^&gt;^&lt;/Query^&gt;^&lt;/QueryList^&gt;^</Subscription^>
+>>"%XML_PATH%" echo       ^<Delay^>PT5S^</Delay^>
 >>"%XML_PATH%" echo     ^</EventTrigger^>
 >>"%XML_PATH%" echo     ^<LogonTrigger^>
 >>"%XML_PATH%" echo       ^<Enabled^>true^</Enabled^>
